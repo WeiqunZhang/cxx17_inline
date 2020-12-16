@@ -5,7 +5,7 @@ ifeq ($(USE_HIP),TRUE)
   CXXFLAGS = -std=c++17 -m64 -g -O3 -Wno-unused-result --amdgpu-target=gfx906,gfx908 -fgpu-rdc
   LINKFLAGS = --amdgpu-target=gfx906,gfx908 -fgpu-rdc
 else
-  nvcc_version := $(shell nvcc --version | grep "release" | awk 'BEGIN {FS = ","} {print $$2}' | awk '{print $$2}')
+  nvcc_major_version := $(shell nvcc --version | grep "release" | awk 'BEGIN {FS = ","} {print $$2}' | awk '{print $$2}' | awk 'BEGIN {FS = "."} {print $$1}')
   nvcc_major_lt_11 = $(shell expr $(nvcc_major_version) \< 11)
   ifeq ($(nvcc_major_lt_11),1)
     $(error nvcc 11 is required for CUDA build)
@@ -16,7 +16,7 @@ else
   LINKFLAGS = -arch=compute_70 -code=sm_70
 endif
 
-test.ex: main.o init.o work.o
+a.out: main.o init.o work.o
 	$(CXX) $(LINKFLAGS) -o $@ $^
 
 init.o: init.cpp init.H par.H
@@ -26,7 +26,7 @@ work.o: work.cpp work.H par.H
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 clean:
-	${RM} *.o *.ex
+	${RM} *.o a.out
 
 FORCE:
 
